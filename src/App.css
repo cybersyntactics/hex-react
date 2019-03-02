@@ -31,3 +31,14 @@
     transform: rotate(360deg);
   }
 }
+
+#App-header {
+  float: left;
+  font-family: Georgia, Times, Serif;
+}
+
+#App-header a {
+  padding-left: 20px;
+  text-decoration: none;
+  color: black;  
+}

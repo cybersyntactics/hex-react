@@ -1,0 +1,68 @@
+svg text {
+  fill: grey;
+  font: 20px serif;
+  text-anchor: end;
+}
+
+svg {
+	float: left;
+}
+
+svg .hex {
+	fill: white;
+	stroke: black; /* #444; */
+	stroke-width: 3px;
+}
+
+svg .goal.red {
+	fill: lightpink;
+}
+
+svg .goal.blue {
+	fill: lightblue;
+}
+
+svg .goal.red.blue {
+	fill: thistle;
+}
+
+svg .hex.locked.red {
+	fill: red;
+}
+
+svg .hex.locked.blue {
+	fill: blue;
+}
+
+svg .checked {
+	fill: black;
+}
+
+svg .hex.neighbor {
+	fill: grey;
+}
+
+svg .hex.locked.checked.blue {
+	fill: darkblue;
+}
+
+svg .hex.locked.checked.red {
+	fill: darkred;
+}
+
+
+/*
+svg .hex:hover {
+	fill: red;
+	stroke: lightgrey;
+}
+
+svg g.hexGroup text {
+	text-anchor: middle;
+	font-size: 15px;
+}
+
+svg .guard {
+	fill: rgba(255,0,0, 0.0);
+}
+*/
