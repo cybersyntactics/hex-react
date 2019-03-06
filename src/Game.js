@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import SvgMap from './SvgMap';
 import './Game.css';
 
 // https://www.redblobgames.com/grids/hexagons/
@@ -76,7 +77,7 @@ class Board extends Component {
                 position={hex.coord}
                 settings={settings}
                 entities={hex.entities}
-                onClick={() => this.props.onClick(hex)}
+                onClick={() => this.props.onClick(hex, this.props.dragging)}
             />
         )
     }
@@ -100,6 +101,11 @@ class Board extends Component {
     }
 }
 
+/**
+ * Class for game.
+ *
+ * @class      Game (name)
+ */
 class Game extends Component {
     constructor(props) {
         super(props);
@@ -127,9 +133,10 @@ class Game extends Component {
         this.handleClick = this.handleClick.bind(this);
     }
 
-    handleClick(currentHex) {
+    handleClick(currentHex, dragging) {
         // If the hex has already been selected do nothing.
-        if(currentHex.entities.values.includes("locked")) {
+        console.log(dragging);
+        if(currentHex.entities.values.includes("locked") || dragging) {
             return;
         }
         // get the current player
@@ -146,8 +153,8 @@ class Game extends Component {
                      entities.values = values.concat(["locked", player])
                 }
                 return hex;
-            }))
-        })
+            })),
+        });
 
         let victory = false;
         // filter for all hexes that have the "start" type for the 
@@ -190,18 +197,19 @@ class Game extends Component {
     render() {
         return (
             <svg 
+                width={943 /*document.body.clientWidth*/}
+                height={622 /*document.documentElement.clientHeight - 39*/}
                 id="playArea"
                 className="playArea" 
                 xmlns="http://www.w3.org/2000/svg"
                 version="1.1"
                 onContextMenu={() => false}
-                width={943 /*document.body.clientWidth*/}
-                height={622 /*document.documentElement.clientHeight - 39*/}
             >
                 <Board 
                     settings={this.state.settings}
                     hexes={this.state.hexes}
                     onClick={this.handleClick}
+                    dragging={this.props.dragging}
                 />
             </svg>
 
@@ -210,13 +218,25 @@ class Game extends Component {
 }
 
 
+//
 // Utility function: return true is all elements in array2 are in array1
+//
+// @param      {Array}   array1  The array 1
+// @param      {<type>}  array2  The array 2
+// @return     {<type>}  { description_of_the_return_value }
+//
 function includesAll(array1, array2) {
     return array2.every(val => array1.includes(val));
 }
 
 
+//
 // Initialize a new hex board for the given height and width
+//
+// @param      {number}  height  The height
+// @param      {number}  width   The width
+// @return     {Array}   The initialized hex board
+//
 function makeBoard(height, width) {
     // Create a 2-D array to store the hexes
     let hexes = Array(height).fill(
@@ -262,7 +282,14 @@ function makeBoard(height, width) {
     });
 }
 
+//
 // Recursive depth first search of the current hex's neighbors
+//
+// @param      {Array}              hex     The hex board
+// @param      {string}             player  The player
+// @param      {Array}              hexes   The hexes
+// @return     {boolean}            Has the player won
+//
 function checkVictory(hex, player, hexes) {
     let victory = false,
         values = hex.entities.values,
@@ -296,7 +323,13 @@ function checkVictory(hex, player, hexes) {
     return victory;
 }
 
+//
 // Return an array of the 6 (or less) neighboring hexes of the passed in hex
+//
+// @param      {Object}  centerHex  The center hex
+// @param      {Array}   hexes      The hexes
+// @return     {Array}   The hex's neighbors.
+//
 function getHexNeighbors(centerHex, hexes) {
     // Array of neighbor q,r coordinates
     let directions = [
@@ -323,4 +356,4 @@ function getHexNeighbors(centerHex, hexes) {
 }
 
 
-export default Game;
+export default SvgMap(Game);

@@ -35,6 +35,8 @@
 #App-header {
   float: left;
   font-family: Georgia, Times, Serif;
+  position: absolute;
+  text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;
 }
 
 #App-header a {

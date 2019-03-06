@@ -7,9 +7,12 @@ class App extends Component {
     return (
       <div className="App">
         <h1 id="App-header">
-          <a href="https://wikipedia.org/wiki/Hex_(board_game)">Hex</a>
+          <a href="https://wikipedia.org/wiki/Hex_(board_game)">HEX</a>
         </h1>
-        <Game />
+        <Game 
+          width={document.documentElement.clientWidth /*943*/}
+          height={document.documentElement.clientHeight /*622*/}
+        />
       </div>
     );
   }
