@@ -12,6 +12,8 @@ class App extends Component {
         <Game 
           width={document.documentElement.clientWidth /*943*/}
           height={document.documentElement.clientHeight /*622*/}
+          id="playArea"
+          className="playArea"
         />
       </div>
     );

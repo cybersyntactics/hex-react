@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import SvgMap from './SvgMap';
+//import SvgMap from './SvgMap';
+import PanAndZoom from './PanAndZoom';
+import PinchZoomPan from './PinchZoomPan';
 import './Game.css';
 
 // https://www.redblobgames.com/grids/hexagons/
@@ -63,7 +65,7 @@ function Hex(props) {
             id={pathId}
             className={displayClasses}
             d={path}
-            onClick={props.onClick}
+            onClickCapture={props.onClickCapture}
         />
     );
 }
@@ -77,7 +79,7 @@ class Board extends Component {
                 position={hex.coord}
                 settings={settings}
                 entities={hex.entities}
-                onClick={() => this.props.onClick(hex, this.props.dragging)}
+                onClickCapture={(e) => this.props.dragged ? false : this.props.onClickCapture(hex)}
             />
         )
     }
@@ -94,6 +96,13 @@ class Board extends Component {
             <g 
                 id="board" 
                 className="board" 
+                    style={{
+                        // Is this necessary for touch pinch zoom? Maybe?
+                        //pointerEvents: this.props.scale === 1 ? 'auto' : 'none',
+                        transform: `translate3d(${this.props.x}px, ${this.props.y}px, 0) scale(${this.props.scale})`,
+                        transformOrigin: '0 0',
+                    }}
+
             >
                 {hexes}
             </g>
@@ -133,90 +142,126 @@ class Game extends Component {
         this.handleClick = this.handleClick.bind(this);
     }
 
-    handleClick(currentHex, dragging) {
+
+
+
+    handleClick(currentHex) {
         // If the hex has already been selected do nothing.
-        console.log(dragging);
-        if(currentHex.entities.values.includes("locked") || dragging) {
+        if(currentHex.entities.values.includes("locked")) {
             return;
         }
         // get the current player
         let player = this.state.redIsNext ? "red" : "blue",
             hexes = this.state.hexes;
 
-        // add "locked" and current player color values to the selected hex
-        // Should this be setState?
-        this.setState({
-            hexes: hexes.map((hexRow, q) => hexRow.map((hex, r) => {
-                let entities = hex.entities;
-                let values = entities.values;
-                if(hex === currentHex) {
-                     entities.values = values.concat(["locked", player])
-                }
-                return hex;
-            })),
-        });
-
-        let victory = false;
-        // filter for all hexes that have the "start" type for the 
-        // appropriate player
-        let startHexes = hexes.flat().filter(hex => {
-            return (
-                includesAll(
-                    hex.entities.types, 
-                    ["start", player]
-                )
-            )
-        });
-        for(let startHex of startHexes) {
-            // Clear all checked values each time startHex iterates
-            this.setState({
-                hexes: hexes.map(hexRow => hexRow.map(hex => {
-                    hex.entities.values = 
-                      hex.entities.values.filter(value => value !== "checked");
-                    return hex;
-                }))
-            });
-            // check if there is a path from the current startHex to any endHex
-            victory = checkVictory(startHex, player, this.state.hexes);
-            // if a path was found we don't need to check for more paths
-            if(victory) break;
-        }
-
-        // If a path was found notify the player
-        if(victory) {
-            alert(player + " won!");
-        }
-
         // set the current player to the next player
         this.setState({
+            hexes: updateBoard(currentHex, hexes, player),
             turn: this.state.turn + 1,
             redIsNext: !this.state.redIsNext
         });
     }
 
+    // render() {
+    //     return (
+    //         <svg 
+    //             width={943 /*document.body.clientWidth*/}
+    //             height={622 /*document.documentElement.clientHeight - 39*/}
+    //             id="playArea"
+    //             className="playArea" 
+    //             xmlns="http://www.w3.org/2000/svg"
+    //             version="1.1"
+    //             onContextMenu={() => false}
+    //         >
+    //             <Board 
+    //                 settings={this.state.settings}
+    //                 hexes={this.state.hexes}
+    //                 onClickCapture={this.handleClick}
+    //                 dragging={this.props.dragging}
+    //                 dragged={this.props.dragged}
+    //             />
+    //         </svg>
+
+    //     )
+    // }
+
     render() {
+        const { height, width, className, id, ...other} = this.props;
+        console.log(this.props);
         return (
-            <svg 
-                width={943 /*document.body.clientWidth*/}
-                height={622 /*document.documentElement.clientHeight - 39*/}
-                id="playArea"
-                className="playArea" 
-                xmlns="http://www.w3.org/2000/svg"
-                version="1.1"
-                onContextMenu={() => false}
-            >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          version="1.1"
+          height={height}
+          width={width}
+          className={className}
+          id={id}
+          ref={(ref) => this.container = ref}
+          {...other}
+        >
+            <PinchZoomPan width={width} height={height}>
+            {(x, y, scale, dragging, dragged) => { //console.log(x,y,scale,dragging,dragged);
+                return (
                 <Board 
                     settings={this.state.settings}
                     hexes={this.state.hexes}
-                    onClick={this.handleClick}
-                    dragging={this.props.dragging}
+                    onClickCapture={this.handleClick}
+                    dragging={dragging}
+                    dragged={dragged}
+                    // style={{
+                    //     pointerEvents: scale === 1 ? 'auto' : 'none',
+                    //     transform: `translate3d(${x}px, ${y}px, 0) scale(${scale})`,
+                    //     transformOrigin: '0 0',
+                    // }}
+                    x={x}
+                    y={y}
+                    scale={scale}                     
                 />
-            </svg>
+            )}}
+            </PinchZoomPan>
+        </svg>
 
         )
     }
 }
+/*
+function SvgMap(ComposedComponent) {
+ return class extends Component {
+  render() {
+    const { height, width, className, id, ...other} = this.props;
+    return (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          version="1.1"
+          height={height}
+          width={width}
+          className={className}
+          id={id}
+          ref={(ref) => this.container = ref}
+          {...other}
+        >
+          <PanAndZoom> 
+            {({x, y, scale, dragging, dragged, ...bind}) => (
+                <ComposedComponent style={{
+                  pointerEvents: scale ? 'auto' : 'none',
+                  transform: `translate3d(${x}px, ${y}px, 0) scale(${scale})`,
+                  transformOrigin: '0 0' //transformOrign: top left
+                }}
+                dragging={dragging}
+                dragged={dragged}
+                {...bind}></ComposedComponent>
+            )}
+            </PanAndZoom>
+        </svg>
+    );
+  }
+}
+}
+*/
 
+//export default SvgMap(Game);
+
+export default Game;
 
 //
 // Utility function: return true is all elements in array2 are in array1
@@ -281,6 +326,51 @@ function makeBoard(height, width) {
         })
     });
 }
+
+function updateBoard(currentHex, hexes, player) {
+    // add "locked" and current player color values to the selected hex
+    // Should this be setState?
+    hexes = hexes.map((hexRow, q) => hexRow.map((hex, r) => {
+        let entities = hex.entities;
+        let values = entities.values;
+        if(hex === currentHex) {
+            entities.values = values.concat(["locked", player])
+        }
+        return hex;
+    }));
+
+    let victory = false;
+    // filter for all hexes that have the "start" type for the 
+    // appropriate player
+    let startHexes = hexes.flat().filter(hex => {
+        return (
+            includesAll(
+                hex.entities.types, 
+                ["start", player]
+            )
+        )
+    });
+    for(let startHex of startHexes) {
+        // Clear all checked values each time startHex iterates
+        hexes = hexes.map(hexRow => hexRow.map(hex => {
+            hex.entities.values = 
+              hex.entities.values.filter(value => value !== "checked");
+            return hex;
+        }))
+        // check if there is a path from the current startHex to any endHex
+        victory = checkVictory(startHex, player, hexes);
+        // if a path was found we don't need to check for more paths
+        if(victory) break;
+    }
+
+    // If a path was found notify the player
+    if(victory) {
+        alert(player + " won!");
+    }
+
+    return hexes;
+}
+
 
 //
 // Recursive depth first search of the current hex's neighbors
@@ -356,4 +446,3 @@ function getHexNeighbors(centerHex, hexes) {
 }
 
 
-export default SvgMap(Game);
