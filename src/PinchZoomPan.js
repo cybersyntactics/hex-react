@@ -301,13 +301,14 @@ class PinchZoomPan extends React.Component {
         // between a click and a drag)
         || Math.abs(Math.max(...current.subtract(this.state.start))) > X_TOLERANCE 
       ) {
-        this.setState(
-          this.panM(
+        this.setState({
+          dragged: true,
+          ...this.panM(
             current,
             this.state.last, 
             this.state.translate 
           )
-        );
+        });
       }
   }
 
@@ -328,9 +329,9 @@ class PinchZoomPan extends React.Component {
   }
 
   handleMouseUp(e) {
-    this.setState({dragging: false, dragged: true}); 
+    this.setState({dragging: false}); 
     if(this.state.dragged) {
-      // e.stopPropagation();
+      e.stopPropagation();
     } 
   }
 
@@ -358,7 +359,7 @@ class PinchZoomPan extends React.Component {
       .multiply(ratio)
     );
 
-    console.log({next, nextScale, scale, delta, SCALE_FACTOR, ratio});
+    //console.log({next, nextScale, scale, delta, SCALE_FACTOR, ratio});
 
     return {
       translate: next,

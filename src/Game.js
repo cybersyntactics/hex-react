@@ -146,6 +146,7 @@ class Game extends Component {
 
 
     handleClick(currentHex) {
+        console.log("click");
         // If the hex has already been selected do nothing.
         if(currentHex.entities.values.includes("locked")) {
             return;
@@ -187,7 +188,7 @@ class Game extends Component {
 
     render() {
         const { height, width, className, id, ...other} = this.props;
-        console.log(this.props);
+        //console.log(this.props);
         return (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -208,11 +209,6 @@ class Game extends Component {
                     onClickCapture={this.handleClick}
                     dragging={dragging}
                     dragged={dragged}
-                    // style={{
-                    //     pointerEvents: scale === 1 ? 'auto' : 'none',
-                    //     transform: `translate3d(${x}px, ${y}px, 0) scale(${scale})`,
-                    //     transformOrigin: '0 0',
-                    // }}
                     x={x}
                     y={y}
                     scale={scale}                     
